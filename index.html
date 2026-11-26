@@ -1,0 +1,946 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>AI 大模型日报</title>
+    <style>
+      button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) { min-height: 2rem; }
+      :root {
+        color-scheme: light dark;
+        --bg: #f6f4ef;
+        --bg-2: #efece4;
+        --paper: #fffefb;
+        --ink: #171512;
+        --ink-soft: #45403a;
+        --muted: #8a8174;
+        --line: #e6e0d3;
+        --line-strong: #cfc7b4;
+        --accent: #9c2a1e;
+        --accent-ink: #7e1f15;
+        --accent-soft: #f8ecea;
+        --gold: #a98a4a;
+        --warn-bg: #fdf6e3;
+        --warn-line: #e2cd8d;
+        --warn-ink: #6b5310;
+        --chip-bg: #f1eee6;
+        --anthropic: #b85a30;
+        --openai: #0f766e;
+        --google: #2563eb;
+        --china: #9d2f5e;
+        --meta: #2f6fb2;
+        --xai: #5b564e;
+        --mistral: #c47d12;
+        --other: #5f7a3a;
+        --bar-track: #ece8dd;
+        --shadow-sm: 0 1px 2px rgba(23,21,18,.04), 0 2px 8px rgba(23,21,18,.04);
+        --shadow: 0 1px 3px rgba(23,21,18,.05), 0 12px 32px rgba(23,21,18,.06);
+        --radius: 14px;
+        --radius-sm: 10px;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #131110;
+          --bg-2: #1a1815;
+          --paper: #1e1b18;
+          --ink: #f0ebe1;
+          --ink-soft: #cbc3b4;
+          --muted: #9c9484;
+          --line: #2f2b26;
+          --line-strong: #4a443a;
+          --accent: #e07a6b;
+          --accent-ink: #f0a99e;
+          --accent-soft: #33201d;
+          --gold: #c9a86a;
+          --warn-bg: #2e2716;
+          --warn-line: #6b5a26;
+          --warn-ink: #e8cd7d;
+          --chip-bg: #27231f;
+          --anthropic: #e08a5c;
+          --openai: #3ec4b0;
+          --google: #7aa7f0;
+          --china: #e08ab0;
+          --meta: #7aa7f0;
+          --xai: #b8b0a0;
+          --mistral: #f0b84a;
+          --other: #a8bf85;
+          --bar-track: #2c2822;
+          --shadow-sm: 0 1px 2px rgba(0,0,0,.25);
+          --shadow: 0 1px 3px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.28);
+        }
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+      body {
+        margin: 0;
+        background:
+          radial-gradient(900px 420px at 50% -80px, color-mix(in srgb, var(--gold) 9%, transparent), transparent 70%),
+          linear-gradient(var(--bg), var(--bg));
+        color: var(--ink);
+        font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Source Han Sans SC", system-ui, -apple-system, "Segoe UI", sans-serif;
+        font-size: 16px; line-height: 1.8;
+        -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+      }
+      ::selection { background: color-mix(in srgb, var(--accent) 18%, transparent); }
+      .progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: var(--accent); z-index: 60; }
+      .wrap { max-width: 920px; margin: 0 auto; padding: 0 24px 80px; }
+
+      /* ---------- Masthead ---------- */
+      .masthead { padding: 40px 0 0; text-align: center; }
+      .mast-kicker { display: flex; align-items: center; gap: 14px; justify-content: center; font-size: 11px; font-weight: 700; letter-spacing: .28em; text-transform: uppercase; color: var(--muted); }
+      .mast-kicker::before, .mast-kicker::after { content: ""; height: 1px; width: 56px; background: var(--line-strong); }
+      .mast-top { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; justify-content: center; margin-top: 18px; }
+      .issue-tag { font-size: 12px; font-weight: 800; letter-spacing: .14em; color: var(--paper); background: var(--ink); border-radius: 999px; padding: 5px 13px; }
+      .issue-tag em { font-style: normal; color: var(--gold); }
+      .mast-date { font-size: 13.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+      .mast-date b { color: var(--ink-soft); font-weight: 600; }
+      h1 { font-family: "Songti SC", "STSong", "Songti TC", "Source Han Serif SC", "SimSun", serif; font-weight: 900; font-size: clamp(42px, 8vw, 68px); line-height: 1.08; margin: 16px 0 10px; letter-spacing: .01em; }
+      h1 .thin { font-weight: 600; color: var(--accent); }
+      .mast-sub { font-size: 15.5px; color: var(--ink-soft); margin: 0 auto 0; max-width: 620px; line-height: 1.75; }
+      .mast-rule { display: flex; align-items: center; gap: 12px; margin: 26px 0 0; }
+      .mast-rule::before, .mast-rule::after { content: ""; flex: 1; height: 1px; background: var(--line-strong); }
+      .mast-rule span { width: 7px; height: 7px; background: var(--accent); transform: rotate(45deg); flex: 0 0 auto; }
+      .mast-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin-top: 0; border-bottom: 1px solid var(--line); text-align: left; }
+      .mast-meta > span { padding: 14px 16px 16px; font-size: 13px; color: var(--muted); line-height: 1.6; border-left: 1px solid var(--line); }
+      .mast-meta > span:first-child { border-left: none; padding-left: 2px; }
+      .mast-meta b { display: block; color: var(--muted); font-weight: 700; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; margin-bottom: 3px; }
+      .mast-meta strong { color: var(--ink); font-weight: 600; font-size: 13.5px; }
+
+      /* ---------- Stats strip ---------- */
+      .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 22px; }
+      .stat { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 16px 14px; box-shadow: var(--shadow-sm); text-align: left; }
+      .stat .num { font-family: "Songti SC", "STSong", "Songti TC", "Source Han Serif SC", "SimSun", serif; font-size: 30px; font-weight: 900; line-height: 1; letter-spacing: -.01em; }
+      .stat .num small { font-size: 14px; font-weight: 700; color: var(--muted); margin-left: 2px; }
+      .stat .lbl { font-size: 12.5px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+      .stat .lbl b { color: var(--ink-soft); font-weight: 600; }
+
+      /* ---------- TOC ---------- */
+      .toc { position: sticky; top: 12px; z-index: 40; display: flex; gap: 6px; overflow-x: auto; padding: 8px; margin-top: 22px; border: 1px solid var(--line); border-radius: 999px; background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(12px); box-shadow: var(--shadow-sm); scrollbar-width: none; }
+      .toc::-webkit-scrollbar { display: none; }
+      .toc a { flex: 1 0 auto; text-align: center; text-decoration: none; color: var(--ink-soft); font-size: 13.5px; font-weight: 600; padding: 7px 14px; border-radius: 999px; min-height: 36px; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; }
+      .toc a:hover { color: var(--accent); background: var(--accent-soft); }
+      .toc a.is-active { background: var(--ink); color: var(--bg); }
+
+      /* ---------- Summary / lead ---------- */
+      .summary { background: var(--ink); color: var(--bg); border-radius: 18px; padding: 26px 28px 22px; margin-top: 26px; box-shadow: var(--shadow); position: relative; overflow: hidden; min-width: 0; }
+      .summary::after { content: "BRIEFING"; position: absolute; right: 18px; top: 10px; font-size: 11px; font-weight: 800; letter-spacing: .3em; opacity: .35; }
+      .summary h2 { font-family: "Songti SC", "STSong", "Songti TC", "Source Han Serif SC", "SimSun", serif; font-size: 13px; font-weight: 700; letter-spacing: .22em; margin: 0 0 14px; color: var(--gold); }
+      .summary ol { margin: 0; padding: 0; list-style: none; counter-reset: brief; display: grid; gap: 14px; min-width: 0; }
+      .summary li { counter-increment: brief; display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 12px; min-width: 0; font-size: 15px; line-height: 1.75; color: color-mix(in srgb, var(--bg) 88%, transparent); }
+      .summary li::before { content: counter(brief, decimal-leading-zero); font-family: "Songti SC", "STSong", "Songti TC", "Source Han Serif SC", "SimSun", serif; font-weight: 900; font-size: 20px; line-height: 1.2; color: var(--gold); min-width: 0; }
+      .summary li .summary-text { min-width: 0; overflow-wrap: break-word; word-break: normal; }
+      .summary li b, .summary li strong { color: var(--bg); }
+
+      section { padding-top: 52px; }
+      .sec-head { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 6px; }
+      .sec-no { font-family: "Songti SC", "STSong", "Songti TC", "Source Han Serif SC", "SimSun", serif; font-size: 13px; font-weight: 900; letter-spacing: .08em; color: var(--paper); background: var(--accent); width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; flex: 0 0 auto; margin-top: 2px; }
+      h2 { font-family: "Songti SC", "STSong", "Songti TC", "Source Han Serif SC", "SimSun", serif; font-size: 27px; font-weight: 900; margin: 0; line-height: 1.3; letter-spacing: .01em; }
+      h2 .no { display: none; }
+      .sec-lede { color: var(--muted); font-size: 14px; margin: 4px 0 22px 54px; line-height: 1.7; max-width: 680px; }
+      section > .sec-lede:first-of-type { margin-left: 54px; }
+
+      /* ---------- Filters ---------- */
+      .filters { display: flex; flex-wrap: wrap; gap: 7px; margin: 0 0 24px 54px; }
+      .filters button { font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; padding: 6px 15px; min-height: 36px; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--paper); color: var(--ink-soft); transition: all .15s ease; }
+      .filters button:hover { border-color: var(--ink); color: var(--ink); }
+      .filters button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+      :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+      /* ---------- Vendor groups ---------- */
+      .vendor { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px 8px; box-shadow: var(--shadow-sm); margin-bottom: 16px; }
+      .vendor-head { display: flex; align-items: center; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid var(--line); margin-bottom: 4px; flex-wrap: wrap; }
+      .vendor-dot { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; box-shadow: 0 0 0 4px color-mix(in srgb, currentColor 0%, transparent); }
+      .vendor h3 { font-family: "Songti SC", "STSong", "Songti TC", "Source Han Serif SC", "SimSun", serif; font-size: 19px; font-weight: 800; margin: 0; }
+      .vendor .vendor-note { font-size: 12.5px; color: var(--muted); margin-left: auto; background: var(--chip-bg); padding: 3px 10px; border-radius: 999px; }
+      .vendor .count { font-size: 12px; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+      .item { padding: 16px 2px 16px 18px; border-bottom: 1px solid var(--line); position: relative; }
+      .item:last-child { border-bottom: none; }
+      .item::before { content: ""; position: absolute; left: 0; top: 26px; width: 6px; height: 6px; border-radius: 50%; background: var(--line-strong); }
+      .item:hover::before { background: var(--accent); }
+      .item h4 { margin: 0 0 5px; font-size: 16.5px; font-weight: 700; line-height: 1.55; letter-spacing: .01em; }
+      .item p { margin: 5px 0; color: var(--ink-soft); font-size: 15px; line-height: 1.8; }
+      .item p b, .item p strong { color: var(--ink); }
+      .date-badge { display: inline-block; font-size: 11.5px; font-weight: 800; letter-spacing: .04em; color: var(--accent-ink); background: var(--accent-soft); border-radius: 999px; padding: 2px 9px; margin-right: 8px; vertical-align: 2px; line-height: 1.7; white-space: nowrap; }
+      .src { font-size: 12.5px; color: var(--muted); margin-top: 7px; }
+      .src::before { content: "来源 · "; font-weight: 600; }
+      a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+      .src a { color: var(--muted); text-decoration-color: var(--line-strong); }
+      .src a:hover { color: var(--accent); }
+      .callout { background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: var(--radius-sm); padding: 14px 16px; margin: 14px 0 14px 0; font-size: 14.5px; color: var(--warn-ink); line-height: 1.75; }
+      .callout .src { color: inherit; opacity: .85; } .callout .src a { color: inherit; }
+      .hidden { display: none !important; }
+      code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .88em; background: var(--chip-bg); padding: 1px 6px; border-radius: 6px; }
+
+      /* ---------- Pricing ---------- */
+      .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper); box-shadow: var(--shadow-sm); }
+      table { border-collapse: collapse; width: 100%; font-size: 14.5px; min-width: 640px; }
+      th, td { text-align: left; padding: 14px 16px; vertical-align: top; border-bottom: 1px solid var(--line); line-height: 1.7; }
+      thead th { font-size: 11.5px; color: var(--muted); font-weight: 800; letter-spacing: .12em; text-transform: uppercase; background: var(--chip-bg); border-bottom: 1px solid var(--line-strong); }
+      tbody tr:last-child td { border-bottom: none; }
+      tbody tr:hover td { background: color-mix(in srgb, var(--chip-bg) 45%, transparent); }
+      td .who { font-weight: 700; }
+      td .when { display: inline-block; font-size: 11.5px; color: var(--accent-ink); font-weight: 800; margin-top: 4px; background: var(--accent-soft); padding: 1px 8px; border-radius: 999px; }
+      .fine-note { font-size: 14px; color: var(--ink-soft); margin-top: 14px; background: var(--paper); border: 1px dashed var(--line-strong); border-radius: var(--radius-sm); padding: 12px 16px; }
+
+      /* ---------- Charts ---------- */
+      .chart-card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px 24px; box-shadow: var(--shadow-sm); margin-bottom: 16px; }
+      .chart-card h3 { font-family: "Songti SC", "STSong", "Songti TC", "Source Han Serif SC", "SimSun", serif; font-size: 19px; font-weight: 800; margin: 0 0 3px; }
+      .chart-sub { font-size: 12.5px; color: var(--muted); margin: 0 0 16px; line-height: 1.6; }
+      .chart-card svg { width: 100%; height: auto; display: block; }
+      .chart-note { font-size: 14px; color: var(--ink-soft); margin: 14px 0 0; padding-left: 18px; }
+      .chart-note li { margin: 6px 0; }
+      .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--ink-soft); margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+      .legend span { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+      .legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+      .mini-table { width: 100%; border-collapse: collapse; font-size: 14.5px; margin-top: 6px; }
+      .mini-table td { padding: 9px 8px; border-bottom: 1px solid var(--line); }
+      .mini-table tr:last-child td { border-bottom: none; }
+      .mini-table td.score { text-align: right; font-variant-numeric: tabular-nums; font-weight: 800; white-space: nowrap; }
+      .mini-table td.rank { width: 34px; color: var(--muted); font-variant-numeric: tabular-nums; font-weight: 700; }
+
+      /* ---------- Fun ---------- */
+      .fun-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+      @media (min-width: 720px) { .fun-grid { grid-template-columns: repeat(3, 1fr); } }
+      .fun-card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 10px; }
+      .fun-card .fun-no { font-family: "Songti SC", "STSong", "Songti TC", "Source Han Serif SC", "SimSun", serif; font-size: 13px; font-weight: 900; letter-spacing: .14em; color: var(--accent); display: flex; align-items: center; gap: 10px; }
+      .fun-card .fun-no::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+      .fun-card h3 { font-size: 16.5px; margin: 0; line-height: 1.5; font-weight: 800; }
+      .fun-card p { font-size: 14.5px; color: var(--ink-soft); margin: 0; flex: 1; line-height: 1.75; }
+      .fun-card .fun-links { font-size: 13.5px; display: flex; flex-wrap: wrap; gap: 6px 14px; border-top: 1px solid var(--line); padding-top: 12px; font-weight: 600; }
+
+      /* ---------- Archive ---------- */
+      .archive { margin-top: 26px; background: var(--paper); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow-sm); overflow: hidden; }
+      .archive-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px; padding: 20px 22px 14px; border-bottom: 1px solid var(--line); }
+      .archive-head h2 { font-size: 20px; }
+      .archive-head .arch-sub { font-size: 13px; color: var(--muted); }
+      .archive-head .arch-count { margin-left: auto; font-size: 12px; font-weight: 800; letter-spacing: .1em; color: var(--muted); background: var(--chip-bg); padding: 4px 10px; border-radius: 999px; }
+      .arch-tools { display: flex; flex-wrap: wrap; gap: 7px; padding: 14px 22px 4px; }
+      .arch-tools button { font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; padding: 5px 13px; min-height: 34px; border-radius: 999px; border: 1px solid var(--line-strong); background: transparent; color: var(--ink-soft); }
+      .arch-tools button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+      .arch-list { padding: 10px 12px 12px; display: grid; gap: 8px; }
+      .arch-item { display: grid; grid-template-columns: 64px 1fr auto; gap: 16px; align-items: center; text-decoration: none; color: inherit; padding: 14px 12px; border-radius: 12px; border: 1px solid transparent; }
+      .arch-item:hover { border-color: var(--line); background: var(--chip-bg); }
+      .arch-item.is-current { border-color: var(--line-strong); background: color-mix(in srgb, var(--accent-soft) 55%, var(--paper)); }
+      .arch-date { text-align: center; background: var(--ink); color: var(--bg); border-radius: 10px; padding: 8px 4px; line-height: 1.15; }
+      .arch-date .d { font-family: "Songti SC", "STSong", "Songti TC", "Source Han Serif SC", "SimSun", serif; font-size: 22px; font-weight: 900; display: block; }
+      .arch-date .m { font-size: 11px; font-weight: 700; letter-spacing: .08em; opacity: .75; }
+      .arch-main h3 { margin: 0 0 3px; font-size: 15.5px; font-weight: 800; line-height: 1.45; }
+      .arch-main h3 .no { font-family: "Songti SC", "STSong", "Songti TC", "Source Han Serif SC", "SimSun", serif; color: var(--accent); margin-right: 6px; }
+      .arch-main p { margin: 0; font-size: 13.5px; color: var(--muted); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+      .arch-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+      .arch-tags span { font-size: 11.5px; font-weight: 700; color: var(--ink-soft); background: var(--chip-bg); border-radius: 999px; padding: 2px 8px; }
+      .arch-item.is-current .arch-tags span { background: var(--paper); }
+      .arch-arrow { font-size: 12px; font-weight: 800; letter-spacing: .08em; color: var(--accent); white-space: nowrap; }
+      .arch-arrow small { display: block; text-align: right; color: var(--muted); font-weight: 600; letter-spacing: 0; margin-top: 3px; }
+      .arch-next { margin: 0 22px 18px; border: 1px dashed var(--line-strong); border-radius: 12px; padding: 13px 16px; font-size: 13.5px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; justify-content: space-between; }
+      .arch-next b { color: var(--ink-soft); }
+      .month-label { font-size: 11px; font-weight: 800; letter-spacing: .18em; color: var(--muted); padding: 10px 12px 2px; text-transform: uppercase; }
+
+      /* ---------- Caveats ---------- */
+      .caveats { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px; box-shadow: var(--shadow-sm); }
+      .caveats ul { margin: 0; padding-left: 20px; } .caveats li { margin: 9px 0; font-size: 14.5px; color: var(--ink-soft); } .caveats li b { color: var(--ink); }
+      details.sources { margin-top: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper); overflow: hidden; }
+      details.sources summary { cursor: pointer; padding: 15px 20px; font-weight: 800; font-size: 15px; min-height: 52px; display: flex; align-items: center; gap: 10px; list-style: none; }
+      details.sources summary::-webkit-details-marker { display: none; }
+      details.sources summary::after { content: "展开 ↓"; margin-left: auto; font-size: 12px; font-weight: 700; color: var(--muted); }
+      details.sources[open ] summary::after { content: "收起 ↑"; }
+      details.sources ul { margin: 0; padding: 4px 20px 18px 38px; font-size: 13.5px; border-top: 1px solid var(--line); }
+      details.sources li { margin: 6px 0; word-break: break-all; } details.sources a { color: var(--muted); } details.sources a:hover { color: var(--accent); }
+
+      /* ---------- Issue nav & footer ---------- */
+      .issue-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 28px; }
+      .issue-nav a, .issue-nav div { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; text-decoration: none; color: inherit; box-shadow: var(--shadow-sm); }
+      .issue-nav .k { font-size: 11px; font-weight: 800; letter-spacing: .16em; color: var(--muted); text-transform: uppercase; }
+      .issue-nav .t { font-weight: 800; font-size: 15px; margin-top: 4px; line-height: 1.5; }
+      .issue-nav .is-disabled { opacity: .55; }
+      .issue-nav .next { text-align: right; }
+      footer { margin-top: 28px; padding: 20px 4px 0; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); line-height: 1.7; display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: space-between; }
+      .to-top { position: fixed; right: 18px; bottom: 18px; z-index: 50; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line-strong); background: var(--paper); color: var(--ink); box-shadow: var(--shadow); cursor: pointer; font-size: 18px; display: none; place-items: center; }
+      .to-top.show { display: grid; }
+
+      /* ---------- Single-file export ---------- */
+      .export-panel { margin-top: 22px; background: var(--paper); border: 1px solid var(--line-strong); border-radius: 18px; box-shadow: var(--shadow-sm); padding: 20px 22px; text-align: left; }
+      .export-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+      .export-head h2 { font-size: 18px; }
+      .export-badge { font-size: 11px; font-weight: 800; letter-spacing: .12em; color: var(--paper); background: var(--accent); border-radius: 999px; padding: 4px 10px; }
+      .export-size { margin-left: auto; font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+      .export-desc { font-size: 14px; color: var(--ink-soft); line-height: 1.75; margin: 10px 0 0; max-width: 720px; }
+      .export-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; align-items: center; }
+      .export-btn { font: inherit; font-size: 14.5px; font-weight: 800; cursor: pointer; border: none; border-radius: 999px; padding: 10px 22px; min-height: 44px; background: var(--ink); color: var(--bg); }
+      .export-btn:hover { background: var(--accent); }
+      .export-note { font-size: 12.5px; color: var(--muted); }
+      .export-status { font-size: 13px; font-weight: 700; color: var(--openai); }
+      .export-list { list-style: none; margin: 16px 0 0; padding: 14px 0 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: 1fr 1fr; gap: 10px 22px; }
+      .export-list li { font-size: 13.5px; color: var(--ink-soft); line-height: 1.65; padding-left: 22px; position: relative; }
+      .export-list li::before { content: "✓"; position: absolute; left: 0; top: 0; font-weight: 900; color: var(--openai); }
+      .export-list li b { color: var(--ink); }
+      .export-list code { font-size: .85em; }
+      @media (max-width: 720px) { .export-list { grid-template-columns: 1fr; } .export-size { margin-left: 0; } }
+
+      @media (max-width: 720px) {
+        .mast-meta { grid-template-columns: 1fr; } .mast-meta > span { border-left: none; border-top: 1px solid var(--line); padding-left: 2px; } .mast-meta > span:first-child { border-top: none; }
+        .stats { grid-template-columns: repeat(2, 1fr); }
+        .sec-lede, section > .sec-lede:first-of-type, .filters { margin-left: 0; }
+        .issue-nav { grid-template-columns: 1fr; } .issue-nav .next { text-align: left; }
+        .arch-item { grid-template-columns: 56px 1fr; } .arch-arrow { display: none; }
+        .toc { border-radius: 14px; flex-wrap: wrap; overflow-x: visible; top: 8px; } .toc a { flex: 1 1 auto; }
+        .table-scroll { overflow-x: visible; border-radius: var(--radius); }
+        table { min-width: 0; } table, tbody, tr, td { display: block; width: 100%; } thead { display: none; }
+        tbody tr { padding: 12px 0; border-bottom: 1px solid var(--line); } tbody tr:last-child { border-bottom: none; }
+        td { border-bottom: none; padding: 4px 16px; } td:nth-child(3) { font-size: 13.5px; } td:nth-child(3)::before { content: "来源 · "; color: var(--muted); font-weight: 700; }
+      }
+      @media (max-width: 560px) {
+        .wrap { padding: 0 16px 64px; } .masthead { padding-top: 28px; }
+        .vendor, .chart-card, .caveats { padding-left: 16px; padding-right: 16px; }
+        .summary { padding: 22px 18px 18px; } .summary li { grid-template-columns: 30px minmax(0, 1fr); }
+        .archive-head, .arch-tools { padding-left: 16px; padding-right: 16px; } .arch-next { margin-left: 16px; margin-right: 16px; }
+      }
+      @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+
+      <div class="progress" id="progress" aria-hidden="true"></div>
+      <header class="masthead" id="issue-001">
+        <div class="mast-kicker">Daily Briefing &nbsp;·&nbsp; 大模型 · 额度 · 排名 · 趣味项目</div>
+        <div class="mast-top">
+          <span class="issue-tag">第 <em>001</em> 期 · 样刊</span>
+          <span class="mast-date"><b>2026 年 11 月 26 日</b> · 星期四 · 北京时间</span>
+        </div>
+        <h1>AI 大模型<span class="thin">日报</span></h1>
+        <p class="mast-sub">全球头部大模型的新发布、额度与价格变动、能力排名，再加几个好玩的 AI 项目——每天早上整理成一期，往期按期号归档，随时回看。</p>
+        <div class="mast-rule" aria-hidden="true"><span></span></div>
+        <div class="mast-meta">
+          <span><b>本期窗口</b><strong>过去 24–48 小时</strong><br>2026 年 11 月 24–26 日</span>
+          <span><b>截稿时间</b><strong>11 月 26 日 16:00</strong><br>北京时间 · 榜单当日官网核对</span>
+          <span><b>本期结构</b><strong>头条 · 价格 · 排名 · 趣味</strong><br>共 5 节 · 28 条来源可溯</span>
+        </div>
+        <div class="stats" aria-label="本期概览">
+          <div class="stat"><div class="num">19<small> 条</small></div><div class="lbl"><b>头条动态</b> · 覆盖 8 个厂商分组</div></div>
+          <div class="stat"><div class="num">7<small> 项</small></div><div class="lbl"><b>额度与价格</b> · 含 1 次额度补偿</div></div>
+          <div class="stat"><div class="num">2<small> 榜</small></div><div class="lbl"><b>能力排名</b> · LMArena + AA 指数</div></div>
+          <div class="stat"><div class="num">3<small> 个</small></div><div class="lbl"><b>趣味项目</b> · 多 AI 辩论与协作</div></div>
+        </div>
+      </header>
+
+      <div class="export-panel" id="export">
+        <div class="export-head">
+          <h2>单文件导出 · 离线版</h2>
+          <span class="export-badge">INDEX.HTML · 单文件</span>
+          <span class="export-size" id="exportSize">正在计算文件大小…</span>
+        </div>
+        <p class="export-desc">本页已经是独立的单文件：样式与脚本全部写在本文件内，断网也能打开。点下方按钮即可把当前这一期下载为一个 <code>index.html</code> 文件，存到电脑或手机上离线阅读、打印或转发文件本身。</p>
+        <div class="export-actions">
+          <button class="export-btn" id="exportBtn" type="button">↓ 下载单文件 index.html</button>
+          <span class="export-status" id="exportStatus" role="status" aria-live="polite"></span>
+          <span class="export-note">下载的是当前页面（含已渲染的排名图），无需再带任何文件夹。</span>
+        </div>
+        <ul class="export-list" aria-label="单文件包含的资源清单">
+          <li><b>样式 CSS：</b>已内联在文件头部的 <code>&lt;style&gt;</code> 中，无外部样式表。</li>
+          <li><b>脚本 JS：</b>已内联在文件末尾的 <code>&lt;script&gt;</code> 中，无外部脚本文件。</li>
+          <li><b>字体：</b>只用系统字体（苹方 / 宋体 / 微软雅黑等），不加载 Google Fonts 或任何网络字体。</li>
+          <li><b>CDN：</b>零引用——不加载任何海外 CDN、统计或第三方库，打开时不向外发请求。</li>
+          <li><b>图片：</b>本期无外部图片文件；两张排名图是页面内生成的内联 SVG，已包含在文件里，不单独成文件。</li>
+          <li><b>外链说明：</b>正文里的来源链接只是可点击的出处，点开才访问，不属于页面加载资源，离线时不影响阅读。</li>
+        </ul>
+      </div>
+
+      <nav class="toc" aria-label="本期目录">
+        <a href="#export">单文件导出</a>
+        <a href="#archive">往期归档</a>
+        <a href="#headlines">头条新闻</a>
+        <a href="#pricing">额度与价格</a>
+        <a href="#rankings">能力排名</a>
+        <a href="#fun">趣味项目</a>
+        <a href="#caveats">未核实说明</a>
+      </nav>
+
+      
+      <section id="archive" style="padding-top:26px" aria-label="往期归档">
+        <div class="archive">
+          <div class="archive-head">
+            <h2 style="font-size:20px">归档 · 全部期数</h2>
+            <span class="arch-sub">按期号倒序整理 · 每期独立成篇，点任意一期跳回正文</span>
+            <span class="arch-count">共 1 期 · 持续更新中</span>
+          </div>
+          <div class="arch-tools" role="group" aria-label="按月份筛选归档">
+            <button type="button" data-arch="all" aria-pressed="true">全部</button>
+            <button type="button" data-arch="2026-11" aria-pressed="false">2026 年 11 月</button>
+            <button type="button" data-arch="rank" aria-pressed="false">含排名变动</button>
+            <button type="button" data-arch="price" aria-pressed="false">含价格 / 额度</button>
+          </div>
+          <div class="month-label">2026 年 11 月 — November 2026</div>
+          <div class="arch-list" id="archList">
+            <a class="arch-item is-current" href="#issue-001" data-month="2026-11" data-tags="rank price">
+              <span class="arch-date"><span class="d">26</span><span class="m">11 月 · 周四</span></span>
+              <span class="arch-main">
+                <h3><span class="no">No.001</span>OpenAI DevDay 与计费修正 · 榜首未换人</h3>
+                <p>OpenAI 发布常驻智能体 Dots、GPT-6.1 Sol 与 Ultrafast，随后承认 GPT-6.2 计费错误并补偿额度；Anthropic 推进 MCP 与桌面 Artifacts；LMArena 榜首仍为 Gemini 4 Carbon，AA 指数榜首仍为 Claude Fable 5.2。</p>
+                <span class="arch-tags"><span>样刊 · 首期</span><span>OpenAI</span><span>Anthropic</span><span>Google</span><span>额度补偿</span><span>排名</span></span>
+              </span>
+              <span class="arch-arrow">本期 · 阅读中 →<small>19 条头条 · 28 条来源</small></span>
+            </a>
+          </div>
+          <div class="arch-next"><span><b>下一期 · No.002</b> &nbsp;预计明日早上约 09:40 更新到本页顶部，往期自动沉入此归档。</span><span>归档规则：期号递增 · 日期倒序 · 标签可筛</span></div>
+        </div>
+      </section>
+
+      <div class="summary">
+        <h2>今日摘要 — 先看这三条</h2>
+        <ol>
+          <li><span class="summary-text"><b>OpenAI DevDay（11 月 24 日）</b>发布常驻智能体 Dots、GPT-6.1 Sol 与 Ultrafast；随后在 11 月 26 日承认 GPT-6.2 计费错误，付费用户额度消耗加快 40% / 25%，并补偿一次 banked reset。</span></li>
+          <li><span class="summary-text"><b>Anthropic</b> 在 MCP 两周年推出 Skills over MCP 等 agent 能力，Claude Artifacts 可安装为桌面应用；同时通知 Claude Opus 4.5 将于 2027 年 1 月 22 日退役。</span></li>
+          <li><span class="summary-text"><b>排名没有换榜首：</b>LMArena Text 榜首仍是 Gemini 4 Carbon（1527），Artificial Analysis 智能指数榜首仍是 Claude Fable 5.2（65）；本周新变化是 Fable 5.2 首次进入 LMArena Text 前十。</span></li>
+        </ol>
+      </div>
+
+      <section id="headlines">
+        <div class="sec-head"><span class="sec-no">01</span><h2>头条模型新闻</h2></div>
+        <p class="sec-lede">每条注明事件日期；发布本身不在本窗口内的，会写出原发布日期，避免把“旧发布的新报道”算成“新发布”。</p>
+
+        <div class="filters" role="group" aria-label="按厂商筛选">
+          <button type="button" data-filter="all" aria-pressed="true">全部</button>
+          <button type="button" data-filter="anthropic" aria-pressed="false">Anthropic</button>
+          <button type="button" data-filter="openai" aria-pressed="false">OpenAI</button>
+          <button type="button" data-filter="google" aria-pressed="false">Google</button>
+          <button type="button" data-filter="china" aria-pressed="false">国产模型</button>
+          <button type="button" data-filter="meta" aria-pressed="false">Meta</button>
+          <button type="button" data-filter="xai" aria-pressed="false">xAI</button>
+          <button type="button" data-filter="mistral" aria-pressed="false">Mistral</button>
+          <button type="button" data-filter="other" aria-pressed="false">其他</button>
+        </div>
+
+        <div class="vendor" data-vendor="anthropic">
+          <div class="vendor-head"><span class="vendor-dot" style="background:var(--anthropic)"></span><h3>Anthropic · Claude</h3><span class="count">4 条 + 1 条澄清</span></div>
+          <div class="item">
+            <h4><span class="date-badge">11 月 24 日</span>Claude Artifacts 可安装为桌面应用（测试版）</h4>
+            <p>在 Claude 对话里生成 artifact 后，点 Share 菜单的 “Install as app”，即可在 macOS / Windows 上以独立窗口运行、出现在 Dock 中；应用可接 connectors、可加菜单栏项，artifact 被编辑后应用自动更新，每次改动都会重新请求权限。覆盖 Claude Desktop 全档位，Enterprise 需手动开启；制作应用及应用内调用 Claude 均计入用量额度。</p>
+            <p class="src"><a href="https://www.macrumors.com/2026/11/25/claude-install-artifacts-desktop-apps/" target="_blank" rel="noopener">MacRumors，2026-11-25</a></p>
+          </div>
+          <div class="item">
+            <h4><span class="date-badge">11 月 24 日</span>MCP 两周年：Skills over MCP 等四项 agent 能力</h4>
+            <p>Skills over MCP 进入公开测试（Pro / Max / Ultra 默认开启），MCP 服务器可直接发布分步操作手册；Tasks 与 Elicitation 正式可用（长时后台任务 + 结果回调、执行关键操作前的用户确认）；File Uploads 正在推出，可把 PDF / 表格 / 图片直接传给 MCP 服务器而不占用模型上下文。Anthropic 称 MCP SDK 月下载量已达 7 亿+（2025 年 11 月为 9000 万），累计 50 亿次下载、1 万+ connectors。</p>
+            <p class="src"><a href="https://betabriefing.ai/channels/first-light/briefings/2026-11-25/" target="_blank" rel="noopener">BetaBriefing 2026-11-25 简报（引述 Anthropic 11 月 24 日公告）</a>；另见 <a href="https://www.theneuron.ai/digest/everything-that-happened-in-ai-today-november-25-2026/" target="_blank" rel="noopener">The Neuron 11 月 25 日日报</a></p>
+          </div>
+          <div class="item">
+            <h4><span class="date-badge">11 月 25 日</span>Messages API 从 Python 迁移到 Rust</h4>
+            <p>Anthropic 工程博客披露：用 Claude agent 团队以生产流量作对照验证新实现，每请求 CPU 约降 70%，中位首 token 时间约降 20%；公开流量已于 2026 年 9 月切换，无停机。注意：迁移本身在 9 月完成，11 月 25 日是博客披露。</p>
+            <p class="src"><a href="https://www.jls42.org/en/news/ia-actualites-25-nov-2026#t-kimi-code-2-8-0-et-kimi-code-desktop-1-5-0" target="_blank" rel="noopener">jls42 11 月 25 日新闻汇总（引述 Anthropic 工程博客）</a></p>
+          </div>
+          <div class="item">
+            <h4><span class="date-badge">11 月 25 日</span>Claude Code 2.1.332</h4>
+            <p>新增 PreSkillShellCommand 钩子（可在 skill 加载时拒绝内联 shell 命令），MCP 任务 ID 上限从 128 扩到 1024 字符，并修复 SSE 与 stdout 相关问题。</p>
+            <p class="src"><a href="https://betabriefing.ai/channels/first-light/briefings/2026-11-25/" target="_blank" rel="noopener">BetaBriefing 2026-11-25 简报</a></p>
+          </div>
+          <div class="callout">
+            <b>澄清：Claude Opus 4.5 不是 11 月的新发布。</b>它是 2025 年 11 月的模型（模型 ID <code>claude-opus-4-5-20251101</code>）。11 月 23 日的新消息是 Anthropic 通知其<b>退役</b>：2027 年 1 月 22 日起在 Claude API 上停用，推荐迁移到 Claude Opus 5.5；同批的 Claude Sonnet 4.5 更早，<b>2026 年 11 月 30 日</b>退役，推荐迁移到 Claude Sonnet 5.5。退役后请求会失败；Bedrock 与 Google 代管的 Claude 另有自己的时间表。
+            <p class="src"><a href="https://www.doitwithfriday.com/news/claude-opus-4-5-retirement/" target="_blank" rel="noopener">DoItWithFriday（引述 Anthropic Model deprecations 页与 11 月 23 日 API 发布说明）</a></p>
+          </div>
+        </div>
+
+        <div class="vendor" data-vendor="openai">
+          <div class="vendor-head"><span class="vendor-dot" style="background:var(--openai)"></span><h3>OpenAI · GPT / ChatGPT</h3><span class="count">6 条</span></div>
+          <div class="item">
+            <h4><span class="date-badge">11 月 24 日</span>DevDay 2026：20+ 项发布，头条是常驻智能体 Dots</h4>
+            <p>每个 Dot 由 GPT-6 Astra 驱动，有自己的云电脑与浏览器，可接 4000+ 应用插件，关掉标签页后继续工作；首个 Dot 包含在 Pro 与 Business Premium 套餐内（符合条件的市场），Enterprise / Edu / Healthcare 为默认关闭的测试版；与 Dot 的对话<b>不计入</b> ChatGPT 用量额度。</p>
+            <p class="src"><a href="https://dev.to/paullovelace/openai-devday-2026-dots-gpt-61-sol-ultrafast-and-sign-in-with-chatgpt-2ggl" target="_blank" rel="noopener">DEV Community DevDay 复盘，2026-11-26（引述 OpenAI 官方回顾）</a></p>
+          </div>
+          <div class="item">
+            <h4><span class="date-badge">11 月 24 日</span>同场发布：GPT-6.1 Sol、Ultrafast 与 Pro 500</h4>
+            <p>GPT-6.1 Sol（<code>gpt-6.1-sol</code>）定价为每百万 token 输入 $2 / 缓存输入 $0.10 / 输出 $10，OpenAI 称其在 agent 编码等任务上接近 GPT-6 Astra，而价格约为后者的五分之一；初期先上 Work 与 Codex，暂未进入主 Chat 标签页。Ultrafast 为极速档：Codex 中最高 300 token/秒，Astra 价格为 $60 输入 / $300 输出每百万 token，ChatGPT 内需 Pro 500（用量为 Plus 的 25 倍）；Pro 200 重新开放报名。另有 Decisions API（小模型做分类/路由，有限预览）、Codex 云端任务、Agents API（含 computer use）与 “Sign in with ChatGPT”（16 家首发合作伙伴，含 Notion、Vercel、Devin 等；用户在合作应用内的合规用量计入其套餐额度）。</p>
+            <p class="src"><a href="https://dev.to/paullovelace/openai-devday-2026-dots-gpt-61-sol-ultrafast-and-sign-in-with-chatgpt-2ggl" target="_blank" rel="noopener">DEV Community DevDay 复盘</a></p>
+          </div>
+          <div class="item">
+            <h4><span class="date-badge">11 月 24 日</span>GPT-6 设计蛋白质：实验室验证 35 / 322 结合</h4>
+            <p>OpenAI 称 GPT-6 家族仅用推理与通用代码工具设计新蛋白结构与序列；与合作方 Onava 的实验室测试中，322 个 minibinder 里 35 个（10.9%）显示与目标结合，覆盖 5 个靶点（IL-17A 18、VEGF-A 8、PD-L1 5、IL-7Rα 3、TrkA 1）。OpenAI 同时承认：序列生成与候选筛选仍借助了专业模型，尚未证明可端到端零样本从头设计；相关预印本未经同行评审。</p>
+            <p class="src"><a href="https://openai.com/index/gpt-6-models-demonstrate-intrinsic-protein-design-capabilities/" target="_blank" rel="noopener">OpenAI 官方</a></p>
+          </div>
+          <div class="item">
+            <h4><span class="date-badge">11 月 23 日起</span>GPT-6.2 Sol 进入主 Chat 标签页</h4>
+            <p>Plus / Pro / Business / Enterprise 用户在主 Chat 中逐步换成对话优化版 GPT-6.2 Sol；Free 与 Go 暂无时间表。OpenAI 同时把 GPT-5.6 Sol（Chat）与 GPT-5.6 Sol / Terra（Work / Codex）的弃用日定为 2026 年 12 月 23 日。</p>
+            <p class="src"><a href="https://particle.news/story/openai-rolls-gpt62-sol-into-chatgpt-for-paid-subscribers" target="_blank" rel="noopener">Particle News</a></p>
+          </div>
+          <div class="item">
+            <h4><span class="date-badge">11 月 24 日</span>API 新增 4 个 Healthcare 模型配置</h4>
+            <p>接入 Responses API，配有面向临床问题的 harness，联网搜索时走专用医学来源索引；定价页标注为促销价，至少持续到 2026 年 12 月 31 日。GPT-6.2 Astra Healthcare 为 $8 / $40 每百万 token，Sol Healthcare 为 $2 / $10。</p>
+            <p class="src"><a href="https://www.jls42.org/en/news/ia-actualites-25-nov-2026#t-kimi-code-2-8-0-et-kimi-code-desktop-1-5-0" target="_blank" rel="noopener">jls42 11 月 25 日新闻汇总</a></p>
+          </div>
+          <div class="item">
+            <h4><span class="date-badge">11 月 25 日</span>其他消息（简述）</h4>
+            <p>GPT-6 Astra 协助业余天文学家用 NASA Kepler / TESS 公开数据发现系外行星候选；OpenAI 发表一篇声称矩阵乘法指数为 9/4 的数学预印本（尚待独立验证）。</p>
+            <p class="src"><a href="https://www.theneuron.ai/digest/everything-that-happened-in-ai-today-november-25-2026/" target="_blank" rel="noopener">The Neuron 11 月 25 日日报</a></p>
+          </div>
+        </div>
+
+        <div class="vendor" data-vendor="google">
+          <div class="vendor-head"><span class="vendor-dot" style="background:var(--google)"></span><h3>Google · Gemini</h3><span class="count">2 条 + 1 条提醒</span></div>
+          <div class="item">
+            <h4><span class="date-badge">11 月 25 日</span>Gemini 新增 60+ 带本地口音的表达性语音</h4>
+            <p>官方 @GeminiApp 于 11 月 25 日 16:33 UTC 在 X 上宣布，覆盖美国、英国、印度、印尼、韩国、巴西，可在设置中选择。截至 11 月 26 日核查，官方 Gemini Apps 发布说明与 Google Blog 尚无对应条目；是否支持 Gemini Live、是否分平台或需付费订阅，官方帖文未说明。</p>
+            <p class="src"><a href="https://appfor.ai/news/gemini-60-new-voices-local-accents" target="_blank" rel="noopener">AppFor.ai，2026-11-26（引述 @GeminiApp 官方帖文）</a></p>
+          </div>
+          <div class="item">
+            <h4><span class="date-badge">11 月 25 日</span>Gemini 4 Neon 首日付费 API 用量创纪录</h4>
+            <p>CEO Pichai 宣布 Neon 在付费 API 上创下首日用量新纪录，但未披露请求数、token 量或收入；Pichai 同时称，自约六周前 Gemini 4 Argon 发布以来，Antigravity 平台的日 token 用量增长了 82%。注意：Neon 本身发布于 <b>11 月 18 日</b>（1M 上下文，$3 输入 / $15 输出每百万 token），11 月 25 日是“用量纪录”消息而非新发布。</p>
+            <p class="src"><a href="https://dev.olivegreentimes.com/news/google-reports-record-first-day-usage-for-gemini-4-neon" target="_blank" rel="noopener">Olive Green Times（引述 Sundar Pichai 11 月 25 日帖文）</a></p>
+          </div>
+          <div class="callout">
+            <b>提醒：Gemini Robotics 2.5 不是 11 月 25 日的新发布。</b>该视觉-语言-动作（VLA）模型发布于 <b>11 月 10 日</b>，11 月 25 日是 InfoQ 的报道/解读：200+ 任务中成功率比此前版本高 30%–100%、任务完成快 20%–30%，梅赛德斯-奔驰产线上的 Apptronik Apollo 2 人形机器人汽车套件分拣成功率达 96%，绕障碍物 / 靠近人员时的安全任务完成率分别提升 33% / 43%，并开源了安全基准 ASIMOV-jailbreak。
+            <p class="src"><a href="https://www.infoq.com/news/2026/11/deepmind-gemini-robotics-2-5/" target="_blank" rel="noopener">InfoQ，2026-11-25</a></p>
+          </div>
+        </div>
+
+        <div class="vendor" data-vendor="china">
+          <div class="vendor-head"><span class="vendor-dot" style="background:var(--china)"></span><h3>DeepSeek / Kimi / Qwen</h3><span class="count">3 条</span><span class="vendor-note">本窗口内三家均无新旗舰模型发布</span></div>
+          <div class="item">
+            <h4>最近的发布（均在本窗口之前）</h4>
+            <p>DeepSeek V4.1-Flash-1017 更新（11 月 13 日）、阿里 Qwen4-Max 正式可用（11 月 16 日）、Moonshot Kimi K3.1 Pro（11 月 5 日）。</p>
+            <p class="src"><a href="https://www.ainchina.com/blog/china-ai-november-model-wars-twelve-days-2026/" target="_blank" rel="noopener">AI in China 11 月中国模型盘点</a>；<a href="https://api.r.qcode.cc/en/qwen4-max-vs-deepseek-v4-1-vs-kimi-k3-1" target="_blank" rel="noopener">Qwen4-Max vs DeepSeek V4.1 Flash vs Kimi K3.1 Pro 对比页</a></p>
+          </div>
+          <div class="item">
+            <h4><span class="date-badge">11 月 25 日</span>Moonshot：Kimi Code 2.8.0 与 Kimi Code Desktop 1.5.0</h4>
+            <p>Always Ask 模式下，经静态验证的只读 Bash 命令不再每次弹窗确认（可另加 ask 规则保留确认）；Agent 与 AgentSwarm 中的实验性 <code>fork</code> 参数被移除；桌面端新增下一提示预测开关。</p>
+            <p class="src"><a href="https://www.jls42.org/en/news/ia-actualites-25-nov-2026#t-kimi-code-2-8-0-et-kimi-code-desktop-1-5-0" target="_blank" rel="noopener">jls42 11 月 25 日新闻汇总</a></p>
+          </div>
+          <div class="item">
+            <h4><span class="date-badge">11 月 25 日</span>Hugging Face 的 1000 个 DeepSeek agent 实验（非 DeepSeek 官方发布）</h4>
+            <p>HF Swarms 团队报告：一个最多 1000 个 DeepSeek agent 的群体在 9 天内写出一个纯 Python 聊天机器人，产生 17.5 万条消息、合并 8500+ 个 PR；HF 同时发布了 Legion（批量启动 agent）与 Msgboard（agent 与人类的消息板）。</p>
+            <p class="src"><a href="https://www.jls42.org/en/news/ia-actualites-25-nov-2026#t-kimi-code-2-8-0-et-kimi-code-desktop-1-5-0" target="_blank" rel="noopener">jls42 11 月 25 日新闻汇总</a></p>
+          </div>
+        </div>
+
+        <div class="vendor" data-vendor="meta">
+          <div class="vendor-head"><span class="vendor-dot" style="background:var(--meta)"></span><h3>Meta · Muse</h3><span class="count">1 条</span></div>
+          <div class="item">
+            <h4><span class="date-badge">11 月 24 日起</span>Muse 进入 Instagram 私信</h4>
+            <p>iOS / Android 用户在美国、加拿大、墨西哥、日本、新加坡可直接在 DM 里与 Muse 对话：就帖子 / 地点 / 商品提问、补看错过的对话；收藏内容可整理为 Collections、转为旅行行程或购物清单；Instagram 称未经用户同意 Muse 不会发消息、发布内容或采取行动；Instagram 发起的对话会同步为 Muse 应用内的 side chat。本窗口内 Meta 没有发布新的 Muse 模型（Muse Wonder / Ember 为 11 月 9 日前后发布）。</p>
+            <p class="src"><a href="https://www.gadgets360.com/ai/news/instagram-brings-meta-muse-ai-assistant-to-dms-12374666" target="_blank" rel="noopener">Gadgets360</a>；另见 <a href="https://www.theneuron.ai/digest/everything-that-happened-in-ai-today-november-25-2026/" target="_blank" rel="noopener">The Neuron 11 月 25 日日报</a></p>
+          </div>
+        </div>
+
+        <div class="vendor" data-vendor="xai">
+          <div class="vendor-head"><span class="vendor-dot" style="background:var(--xai)"></span><h3>xAI · Grok</h3><span class="count">1 条</span><span class="vendor-note">本窗口内无新发布</span></div>
+          <div class="item">
+            <h4>当前旗舰仍为 Grok 4.7</h4>
+            <p>Grok 5 尚无可核实的发布日期、模型卡或定价，属未确认传闻。Grok 4.7（Xhigh）在 Artificial Analysis 实时榜单中的智能指数为 35，见下方排名一节。</p>
+            <p class="src"><a href="https://frontrumors.com/roundups/" target="_blank" rel="noopener">Frontrumors 模型传闻核查（11 月 16 日核查）</a></p>
+          </div>
+        </div>
+
+        <div class="vendor" data-vendor="mistral">
+          <div class="vendor-head"><span class="vendor-dot" style="background:var(--mistral)"></span><h3>Mistral</h3><span class="count">1 条</span></div>
+          <div class="item">
+            <h4><span class="date-badge">11 月 24 日</span>Mistral Small 4 上架 Hugging Face</h4>
+            <p>119B 参数 MoE 模型，每 token 激活约 6.5B（128 个专家、每 token 激活 4 个），256k 上下文，Apache 2.0 开源许可；指令、推理、编码合为同一权重；Mistral 称延迟模式下比 Small 3 快 40%，批量吞吐可达 3 倍，并提供 vLLM 配置与 eagle 草稿模型。Mistral Large 4 本窗口内无新发布（其权重发布与 GA 在 10 月底–11 月 20 日前后）。注：上架日期来自二手报道，未见官方公告，见文末说明。</p>
+            <p class="src"><a href="https://aheadline.io/en/article/mistral-small-4-119b-apache-licens?preview=false" target="_blank" rel="noopener">Aheadline，2026-11-25</a>；模型卡：<a href="https://huggingface.co/Armen355/Mistral-Small-4-119B-2603" target="_blank" rel="noopener">Hugging Face</a></p>
+          </div>
+        </div>
+
+        <div class="vendor" data-vendor="other">
+          <div class="vendor-head"><span class="vendor-dot" style="background:var(--other)"></span><h3>其他值得一提</h3><span class="count">3 条</span><span class="vendor-note">均为 11 月 25 日</span></div>
+          <div class="item">
+            <h4>Sakana AI：Namazu Small（30B 推理模型）</h4>
+            <p>基于 NVIDIA 开源 Nemotron 3 Nano 底座，Sakana 自行继续预训练与后训练；公司自报在 25 项基准平均分上超过同尺寸 Nano 与约 4 倍大的 Nemotron 3 Super（120B），其中 BrowseComp 73.5 vs 36.1、LLM-jp LongBench 86.0 vs 60.0，但纯知识问答 SimpleQA Verified 仅 6.8 vs 18.1；暂无公开权重 / API / 定价，本地部署细节计划于 12 月上中旬公布。以上均为公司自报分数，未经独立复核。</p>
+            <p class="src"><a href="https://www.jls42.org/en/news/ia-actualites-25-nov-2026#t-kimi-code-2-8-0-et-kimi-code-desktop-1-5-0" target="_blank" rel="noopener">jls42 11 月 25 日汇总</a>；<a href="https://superpowerdaily.com/posts/sakana-ai-introduces-a-30b-model-it-says-outperforms-nvidia-s-120b-rival" target="_blank" rel="noopener">Superpower Daily</a></p>
+          </div>
+          <div class="item">
+            <h4>Perplexity：Time Machine</h4>
+            <p>在 Search API 与 Context API 中新增 <code>snapshot_as_of</code> 参数，可把搜索限定在过去最多 365 天内某一日期的网页快照，用于训练 / 评估 agent 而不被事后文章“剧透”答案；不另收费（Search $5 / 1000 次、Context $1 / 1000 个 URL）。</p>
+            <p class="src"><a href="https://www.jls42.org/en/news/ia-actualites-25-nov-2026#t-kimi-code-2-8-0-et-kimi-code-desktop-1-5-0" target="_blank" rel="noopener">jls42 11 月 25 日汇总</a></p>
+          </div>
+          <div class="item">
+            <h4>OpenClaw ShellBench：agent 基准新榜</h4>
+            <p>13 个前沿模型、100 个真实任务的 agent 基准：GPT-6 Astra 完成率 62.5% 居首，Claude Fable 5.2 为 61.9%，GPT-6.1 Sol 为 61.4%。</p>
+            <p class="src"><a href="https://betabriefing.ai/channels/first-light/briefings/2026-11-25/" target="_blank" rel="noopener">BetaBriefing 2026-11-25 简报</a></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="pricing">
+        <div class="sec-head"><span class="sec-no">02</span><h2>额度、定价与订阅变化</h2></div>
+        <p class="sec-lede">本期最实的一条：OpenAI 今天承认 GPT-6.2 计费算错了，付费用户会更快触顶，但补了一次额度重置。</p>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th scope="col">厂商 / 产品</th><th scope="col">变化内容</th><th scope="col">来源</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="who">OpenAI / ChatGPT（GPT-6.2）</span><span class="when">2026-11-26 · 今天</span></td>
+                <td>承认 GPT-6.2 发布时计费错误，低估了 Astra 与 Sol 的用量，现已修复：同样的工作量下，达到额度上限的速度比上周快 <b>Astra 40%、Sol 25%</b>；不追收过去的差额；给 Go / Plus / Pro / Business 用户各补<b>一次 banked reset</b>；订阅价格本身未变。</td>
+                <td><a href="https://www.neowin.net/news/paying-chatgpt-users-will-hit-gpt-62-limits-faster-after-openai-fixes-a-launch-mistake/" target="_blank" rel="noopener">Neowin，2026-11-26（引述 OpenAI 产品负责人 Tibo Sottiaux 当日 X 帖文）</a></td>
+              </tr>
+              <tr>
+                <td><span class="who">OpenAI / ChatGPT（Chat + Work 合并）</span><span class="when">2026-11-25 起向小部分 Pro 推送，12 月扩大</span></td>
+                <td>Chat 与 Work 共用<b>一个用量表</b>；Instant 模型不限量、不计入共享额度，用完额度后仍可用 Instant；OpenAI 称多数用户不会更频繁地触顶，但<b>最重度的一小部分用户可能更快触顶</b>。</td>
+                <td><a href="https://techcrunch.com/2026/11/25/openai-says-heavy-chatgpt-users-may-hit-limits-sooner-as-it-merges-chat-and-work/" target="_blank" rel="noopener">TechCrunch，2026-11-25</a></td>
+              </tr>
+              <tr>
+                <td><span class="who">OpenAI / DevDay 新定价</span><span class="when">2026-11-24</span></td>
+                <td>GPT-6.1 Sol：$2 输入 / $0.10 缓存输入 / $10 输出（每百万 token）；Ultrafast：Astra $60 / $300，ChatGPT 内需 Pro 500（Plus 的 25 倍用量）；首个 Dot 包含在 Pro / Business Premium 内，且 Dot 对话不计用量；Pro 200 重新开放报名。</td>
+                <td><a href="https://dev.to/paullovelace/openai-devday-2026-dots-gpt-61-sol-ultrafast-and-sign-in-with-chatgpt-2ggl" target="_blank" rel="noopener">DEV Community DevDay 复盘</a></td>
+              </tr>
+              <tr>
+                <td><span class="who">OpenAI / Healthcare 模型</span><span class="when">2026-11-24</span></td>
+                <td>4 个 Healthcare 配置为促销价，至少到 2026 年 12 月 31 日：GPT-6.2 Astra Healthcare $8 / $40、Sol Healthcare $2 / $10（每百万 token）。</td>
+                <td><a href="https://www.jls42.org/en/news/ia-actualites-25-nov-2026#t-kimi-code-2-8-0-et-kimi-code-desktop-1-5-0" target="_blank" rel="noopener">jls42 11 月 25 日汇总</a></td>
+              </tr>
+              <tr>
+                <td><span class="who">Anthropic / Claude 模型退役</span><span class="when">通知 2026-11-23；Sonnet 4.5 退役 2026-11-30，Opus 4.5 退役 2027-01-22</span></td>
+                <td>退役后请求失败。Opus 4.5（$5 / $25）→ Opus 5.5（$4 / $20，目录价便宜 20%）；Sonnet 4.5 → Sonnet 5.5。注意：个别分析指出 Opus 5.5 的 token 用量可能更高，实际账单未必更低，迁移前应用真实任务对比。</td>
+                <td><a href="https://www.doitwithfriday.com/news/claude-opus-4-5-retirement/" target="_blank" rel="noopener">DoItWithFriday</a>；价格对比另见 <a href="https://www.baristalabs.io/blog/claude-opus-4-5-retirement-opus-5-5" target="_blank" rel="noopener">BaristaLabs</a></td>
+              </tr>
+              <tr>
+                <td><span class="who">Google / Gemini 4 Neon</span><span class="when">发布 2026-11-18；11-25 为用量消息</span></td>
+                <td>$3 输入 / $15 输出每百万 token，1M 上下文；Pro / Ultra 用户可在 Gemini 应用与 Antigravity 中使用。</td>
+                <td><a href="https://dev.olivegreentimes.com/news/google-reports-record-first-day-usage-for-gemini-4-neon" target="_blank" rel="noopener">Olive Green Times</a></td>
+              </tr>
+              <tr>
+                <td><span class="who">Perplexity / Time Machine</span><span class="when">2026-11-25</span></td>
+                <td>不另收费，沿用现有 API 价（Search $5 / 1000 次、Context $1 / 1000 个 URL）。</td>
+                <td><a href="https://www.jls42.org/en/news/ia-actualites-25-nov-2026#t-kimi-code-2-8-0-et-kimi-code-desktop-1-5-0" target="_blank" rel="noopener">jls42 11 月 25 日汇总</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="fine-note"><b>本窗口内未发现</b> DeepSeek、Qwen、Kimi、Meta、xAI、Mistral 的订阅价或配额调整（Mistral Small 4 为 Apache 2.0 开源权重，可自行部署，无订阅价）。</p>
+      </section>
+
+      <section id="rankings">
+        <div class="sec-head"><span class="sec-no">03</span><h2>能力排名</h2></div>
+        <p class="sec-lede">两个榜口径不同：LMArena 是人类偏好投票，Artificial Analysis 是 9 项评测的复合指数。分数只在同榜、同档位内可比。</p>
+
+        <div class="chart-card">
+          <h3>LMArena · Text 榜前十</h3>
+          <p class="chart-sub">2026-11-26 官网实时核对 · 人类匿名双盲投票（风格控制后 Elo 类分数）· 共 414 个模型配置</p>
+          <div id="chart-lmarena" role="img" aria-label="LMArena Text 榜前十：Gemini 4 Carbon 1527 分居首，Claude Fable 5.2 以 1502 分新进前十、位列第 8。"></div>
+          <div class="legend" id="legend-lmarena"></div>
+          <ul class="chart-note">
+            <li><b>本周变化：</b>Claude Fable 5.2 新进入 Text 榜前 20，位列第 8（1502）；其余前十名次基本稳定，Gemini 4 Carbon 仍领先第 2 名 7 分。</li>
+            <li>LMArena 11 月 24 日还推出了 3D 生成榜（Arena 3D Leaderboard）。</li>
+          </ul>
+          <p class="src"><a href="https://arena.ai/leaderboard" target="_blank" rel="noopener">LMArena / Arena 官网 leaderboard</a>；镜像（数据日期 2026-11-22，结果一致）：<a href="https://www.benchleader.com/benchmarks/lmarena_text" target="_blank" rel="noopener">BenchLeader LMArena Text</a></p>
+        </div>
+
+        <div class="chart-card">
+          <h3>Artificial Analysis · 智能指数前六</h3>
+          <p class="chart-sub">Intelligence Index v5.0.1 · 2026-11-26 官网实时核对 · 9 项评测复合分（知识工作、编码、科学、通识各 25%），满分 100 · 柱长按 0–100 全量程绘制</p>
+          <div id="chart-aa" role="img" aria-label="Artificial Analysis 智能指数前六：Claude Fable 5.2 以 65 分居首，GPT-6.2 Astra 与 Gemini 4 Neon 同为 62 分。"></div>
+          <div class="legend" id="legend-aa"></div>
+          <ul class="chart-note">
+            <li><b>榜首没有变化：</b>Claude Fable 5.2 自 11 月 9 日上榜以来一直领先；GPT-6.2 Astra（11 月 17 日上榜）是其最接近的追赶者。括号内为精确到一位小数的分数（官网显示整数）。</li>
+            <li><b>性价比：</b>同为 62 分档，GPT-6.2 Astra 每任务 $4.00，远低于 Fable 5.2 Max 的 $26.54；GPT-6.2 Sol 以 57 分、$1.01 / 任务成为前十中最便宜的配置。</li>
+            <li><b>开源权重模型：</b>最高为 Kimi K3.1 Pro（47，精确 46.5，$3.68 / 任务），其次 Qwen4 Max（43）、DeepSeek V4.1 Flash 1017 Max（32）、Mistral Large 4 High（26）；Grok 4.7（Xhigh）为 35。</li>
+          </ul>
+          <p class="src"><a href="https://artificialanalysis.ai/leaderboards/models" target="_blank" rel="noopener">Artificial Analysis LLM Leaderboard</a>；精确分数镜像：<a href="https://www.benchleader.com/benchmarks/aa_intelligence_index_v5" target="_blank" rel="noopener">BenchLeader AA 镜像</a></p>
+        </div>
+
+        <div class="chart-card">
+          <h3>别混淆：LMArena Agent Arena Index 前五</h3>
+          <p class="chart-sub">agent 综合指数，11 月 18 日推出 · 与 Text 榜是不同的指数，分数不要直接比较</p>
+          <table class="mini-table">
+            <tr><td class="rank">1</td><td>Claude Fable 5.2（Max）</td><td class="score">1449</td></tr>
+            <tr><td class="rank">2</td><td>Claude Opus 5.5（Max）</td><td class="score">1342</td></tr>
+            <tr><td class="rank">3</td><td>Gemini 4 Neon（xHigh）</td><td class="score">1331</td></tr>
+            <tr><td class="rank">4</td><td>Gemini 4 Carbon（High）</td><td class="score">1304</td></tr>
+            <tr><td class="rank">5</td><td>Claude Sonnet 5.5（Max）</td><td class="score">1292</td></tr>
+          </table>
+          <p class="src"><a href="https://arena.ai/leaderboard" target="_blank" rel="noopener">Arena 官网</a></p>
+        </div>
+      </section>
+
+      <section id="fun">
+        <div class="sec-head"><span class="sec-no">04</span><h2>趣味 AI 项目</h2></div>
+        <p class="sec-lede">今天的共同主题：让一群 AI 先吵起来，再看它们能不能吵出更好的答案。</p>
+        <div class="fun-grid">
+          <article class="fun-card">
+            <div class="fun-no">PROJECT — 01</div>
+            <h3>AI Conference Room — 两个 AI 在一个房间里当面谈判</h3>
+            <p>两个人各把自己的 AI 助手放进同一个房间 ID，两个助手各凭自己机器上的文件、日志与约束对话，彼此看不到对方的资料；你可以打开链接实时围观，最后由双方投票达成结论才算谈完。页面上的实例：一支支付团队的助手与一支移动端团队的助手，商量一个旧 API 到底何时能下线。好玩点：分歧是真的——因为双方掌握的信息本来就不一样。</p>
+            <div class="fun-links"><a href="https://www.getaiconferenceroom.com/" target="_blank" rel="noopener">getaiconferenceroom.com</a></div>
+          </article>
+          <article class="fun-card">
+            <div class="fun-no">PROJECT — 02</div>
+            <h3>The AI Counsel — 把问题交给一个“AI 议会”</h3>
+            <p>源自 Andrej Karpathy 的 LLM Council 思路：一个问题同时发给多个模型，模型们匿名互评、为排名辩护，最后由一位“主席”模型综合成最终答案。作者实测：4 个模型、2 个问题就烧了约 71 万 token，不适合日常使用，适合高风险决策前的“找盲点”。开源，可本地跑。</p>
+            <div class="fun-links">
+              <a href="https://www.makeuseof.com/the-guy-who-coined-vibe-coding-never-trusts-a-single-ai-and-you-can-copy-his-setup-for-free/" target="_blank" rel="noopener">MakeUseOf 介绍（2026-11-20）</a>
+              <a href="https://github.com/jacob-bd/the-ai-counsel" target="_blank" rel="noopener">GitHub 仓库</a>
+            </div>
+          </article>
+          <article class="fun-card">
+            <div class="fun-no">PROJECT — 03</div>
+            <h3>Assembly — 多智能体“辩论工作室”</h3>
+            <p>实验性开源项目：Solver、Researcher、Critic、Planner、Synthesizer 等角色先独立解题，再对比立场与证据，分歧大时触发研究或辩论，最后合成的答案会明确标出尚未解决的不确定性；可自选 3 / 5 / 10 / 15 分钟时间预算，自带 API key（BYOK）。作者明确提醒：这只是工程实验，尚未证明能提高答案准确率。</p>
+            <div class="fun-links"><a href="https://hackernoon.com/can-ai-agents-produce-better-answers-by-disagreeing-with-each-other" target="_blank" rel="noopener">HackerNoon（状态快照 2026-11-17）</a></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="caveats">
+        <div class="sec-head"><span class="sec-no">05</span><h2>未核实与说明</h2></div>
+        <p class="sec-lede">查不到、只有二手来源、或发布方自报的，都在这里明说。</p>
+        <div class="caveats">
+          <ul>
+            <li><b>DeepSeek、Qwen、xAI 本窗口内无新发布</b>，是“检索后未发现”，不是“确认没有”；仍建议以各家发布页复核。</li>
+            <li><b>Mistral Small 4 的 11 月 24 日上架日期</b>来自 Aheadline 11 月 25 日的报道；Hugging Face 模型卡本身可核实参数（119B / 6.5B 激活 / 256k / Apache 2.0），但未直接读到 Mistral 官方公告页，日期留有余地。</li>
+            <li><b>Gemini 60+ 新语音</b>仅有 @GeminiApp 的 X 帖文为凭，官方发布说明与 Google Blog 在 11 月 26 日核查时无对应条目；是否支持 Gemini Live、是否分平台 / 需付费，均未核实。</li>
+            <li><b>Sakana Namazu Small、ShellBench、GPT-6 蛋白质设计中的基准分数</b>均为发布方自报，未经独立复核；GPT-6 蛋白质预印本未经同行评审。</li>
+            <li><b>AIWeekly 11 月 25 日“Anthropic 发布 Claude Opus 4.5”的说法</b>与多方来源冲突：模型 ID 表明其为 2025 年 11 月模型，且官方退役页显示退役通知日为 2026 年 11 月 23 日。本日报按退役通知处理。</li>
+            <li><b>LMArena 与 AA 的分数来自不同方法</b>（人类偏好投票 vs 9 项评测复合），且同一模型在不同推理档位（Max / Xhigh / High）下分数不同，跨榜、跨档位比较分数没有意义；本日报均注明档位。</li>
+          </ul>
+        </div>
+
+        <details class="sources">
+          <summary>本期全部来源（28 条）</summary>
+          <ul>
+            <li>LMArena 官网（实时核对 2026-11-26）：<a href="https://arena.ai/leaderboard" target="_blank" rel="noopener">arena.ai/leaderboard</a></li>
+            <li>Artificial Analysis LLM Leaderboard（实时核对 2026-11-26）：<a href="https://artificialanalysis.ai/leaderboards/models" target="_blank" rel="noopener">artificialanalysis.ai/leaderboards/models</a></li>
+            <li>BenchLeader LMArena Text 镜像：<a href="https://www.benchleader.com/benchmarks/lmarena_text" target="_blank" rel="noopener">benchleader.com/benchmarks/lmarena_text</a></li>
+            <li>BenchLeader AA Intelligence Index v5 镜像：<a href="https://www.benchleader.com/benchmarks/aa_intelligence_index_v5" target="_blank" rel="noopener">benchleader.com/benchmarks/aa_intelligence_index_v5</a></li>
+            <li>MacRumors — Claude Artifacts 桌面应用：<a href="https://www.macrumors.com/2026/11/25/claude-install-artifacts-desktop-apps/" target="_blank" rel="noopener">macrumors.com</a></li>
+            <li>BetaBriefing 2026-11-25（MCP 两周年、ShellBench）：<a href="https://betabriefing.ai/channels/first-light/briefings/2026-11-25/" target="_blank" rel="noopener">betabriefing.ai</a></li>
+            <li>The Neuron 2026-11-25 日报：<a href="https://www.theneuron.ai/digest/everything-that-happened-in-ai-today-november-25-2026/" target="_blank" rel="noopener">theneuron.ai</a></li>
+            <li>jls42 2026-11-25 新闻汇总：<a href="https://www.jls42.org/en/news/ia-actualites-25-nov-2026#t-kimi-code-2-8-0-et-kimi-code-desktop-1-5-0" target="_blank" rel="noopener">jls42.org</a></li>
+            <li>DoItWithFriday — Claude Opus 4.5 退役：<a href="https://www.doitwithfriday.com/news/claude-opus-4-5-retirement/" target="_blank" rel="noopener">doitwithfriday.com</a></li>
+            <li>BaristaLabs — Opus 4.5 退役与价格对比：<a href="https://www.baristalabs.io/blog/claude-opus-4-5-retirement-opus-5-5" target="_blank" rel="noopener">baristalabs.io</a></li>
+            <li>DEV Community — OpenAI DevDay 2026 复盘：<a href="https://dev.to/paullovelace/openai-devday-2026-dots-gpt-61-sol-ultrafast-and-sign-in-with-chatgpt-2ggl" target="_blank" rel="noopener">dev.to</a></li>
+            <li>Neowin — OpenAI GPT-6.2 计费修正：<a href="https://www.neowin.net/news/paying-chatgpt-users-will-hit-gpt-62-limits-faster-after-openai-fixes-a-launch-mistake/" target="_blank" rel="noopener">neowin.net</a></li>
+            <li>TechCrunch — Chat 与 Work 合并：<a href="https://techcrunch.com/2026/11/25/openai-says-heavy-chatgpt-users-may-hit-limits-sooner-as-it-merges-chat-and-work/" target="_blank" rel="noopener">techcrunch.com</a></li>
+            <li>OpenAI 官方 — GPT-6 蛋白质设计：<a href="https://openai.com/index/gpt-6-models-demonstrate-intrinsic-protein-design-capabilities/" target="_blank" rel="noopener">openai.com</a></li>
+            <li>Particle News — GPT-6.2 Sol 进入主 Chat：<a href="https://particle.news/story/openai-rolls-gpt62-sol-into-chatgpt-for-paid-subscribers" target="_blank" rel="noopener">particle.news</a></li>
+            <li>AppFor.ai — Gemini 60+ 新语音：<a href="https://appfor.ai/news/gemini-60-new-voices-local-accents" target="_blank" rel="noopener">appfor.ai</a></li>
+            <li>Olive Green Times — Gemini 4 Neon 首日用量纪录：<a href="https://dev.olivegreentimes.com/news/google-reports-record-first-day-usage-for-gemini-4-neon" target="_blank" rel="noopener">dev.olivegreentimes.com</a></li>
+            <li>InfoQ — Gemini Robotics 2.5：<a href="https://www.infoq.com/news/2026/11/deepmind-gemini-robotics-2-5/" target="_blank" rel="noopener">infoq.com</a></li>
+            <li>Gadgets360 — Meta Muse 进入 Instagram 私信：<a href="https://www.gadgets360.com/ai/news/instagram-brings-meta-muse-ai-assistant-to-dms-12374666" target="_blank" rel="noopener">gadgets360.com</a></li>
+            <li>Aheadline — Mistral Small 4：<a href="https://aheadline.io/en/article/mistral-small-4-119b-apache-licens?preview=false" target="_blank" rel="noopener">aheadline.io</a></li>
+            <li>Hugging Face — Mistral Small 4 模型卡：<a href="https://huggingface.co/Armen355/Mistral-Small-4-119B-2603" target="_blank" rel="noopener">huggingface.co</a></li>
+            <li>Superpower Daily — Sakana Namazu Small：<a href="https://superpowerdaily.com/posts/sakana-ai-introduces-a-30b-model-it-says-outperforms-nvidia-s-120b-rival" target="_blank" rel="noopener">superpowerdaily.com</a></li>
+            <li>AI in China — 11 月中国模型盘点：<a href="https://www.ainchina.com/blog/china-ai-november-model-wars-twelve-days-2026/" target="_blank" rel="noopener">ainchina.com</a></li>
+            <li>Frontrumors — Grok 5 等传闻核查：<a href="https://frontrumors.com/roundups/" target="_blank" rel="noopener">frontrumors.com</a></li>
+            <li>AI Conference Room：<a href="https://www.getaiconferenceroom.com/" target="_blank" rel="noopener">getaiconferenceroom.com</a></li>
+            <li>MakeUseOf — The AI Counsel：<a href="https://www.makeuseof.com/the-guy-who-coined-vibe-coding-never-trusts-a-single-ai-and-you-can-copy-his-setup-for-free/" target="_blank" rel="noopener">makeuseof.com</a></li>
+            <li>The AI Counsel 仓库：<a href="https://github.com/jacob-bd/the-ai-counsel" target="_blank" rel="noopener">github.com/jacob-bd/the-ai-counsel</a></li>
+            <li>HackerNoon — Assembly：<a href="https://hackernoon.com/can-ai-agents-produce-better-answers-by-disagreeing-with-each-other" target="_blank" rel="noopener">hackernoon.com</a></li>
+          </ul>
+        </details>
+      </section>
+
+      <nav class="issue-nav" aria-label="期数导航">
+        <div class="is-disabled"><div class="k">← 上一期</div><div class="t">暂无上一期 — 这是创刊样刊</div></div>
+        <a class="next" href="#archive"><div class="k">归档索引 →</div><div class="t">查看全部期数 · No.001 起持续累积</div></a>
+      </nav>
+      <footer>
+        <span><b style="color:var(--ink)">AI 大模型日报</b> · 第 001 期 · 2026 年 11 月 26 日样刊。榜单为当日官网核对；其余条目均附原文来源，无可核实来源不收录。</span>
+        <span>每日早上更新 · 新一期置顶，往期归档于上方索引</span>
+      </footer>
+      <button class="to-top" id="toTop" type="button" aria-label="回到顶部">↑</button>
+    </div>
+
+    <script>
+      (function () {
+        var css = getComputedStyle(document.documentElement);
+        function v(name) { return css.getPropertyValue(name).trim(); }
+        var COLORS = {
+          google: v('--google'), anthropic: v('--anthropic'), meta: v('--meta'),
+          openai: v('--openai'), ink: v('--ink'), muted: v('--muted'),
+          line: v('--line'), track: v('--bar-track')
+        };
+        var VENDOR_LABEL = { google: 'Google', anthropic: 'Anthropic', meta: 'Meta', openai: 'OpenAI' };
+
+        /* ---- LMArena Text top 10 (single data source for marks, labels, legend) ---- */
+        var lmarena = [
+          { name: 'Gemini 4 Carbon', tier: 'High', vendor: 'google', score: 1527 },
+          { name: 'Gemini 4 Argon', tier: 'High', vendor: 'google', score: 1520 },
+          { name: 'Gemini 4 Neon', tier: 'xHigh', vendor: 'google', score: 1512 },
+          { name: 'Muse Wonder', tier: 'Max', vendor: 'meta', score: 1512 },
+          { name: 'Claude Opus 5.5', tier: 'High', vendor: 'anthropic', score: 1507 },
+          { name: 'Claude Fable 5', tier: 'High', vendor: 'anthropic', score: 1504 },
+          { name: 'Claude Opus 4.6', tier: 'High', vendor: 'anthropic', score: 1503 },
+          { name: 'Claude Fable 5.2', tier: 'Max', vendor: 'anthropic', score: 1502, isNew: true },
+          { name: 'Claude Fable 5.1', tier: 'Max', vendor: 'anthropic', score: 1502 },
+          { name: 'Claude Opus 4.7', tier: 'High', vendor: 'anthropic', score: 1501 }
+        ];
+
+        /* ---- Artificial Analysis Intelligence Index top 6 ---- */
+        var aa = [
+          { name: 'Claude Fable 5.2', tier: 'Max', vendor: 'anthropic', score: 65, exact: 64.8, cost: 26.54 },
+          { name: 'GPT-6.2 Astra', tier: 'Max', vendor: 'openai', score: 62, exact: 62.2, cost: 4.00 },
+          { name: 'Gemini 4 Neon', tier: 'Xhigh', vendor: 'google', score: 62, exact: 61.5, cost: 6.44 },
+          { name: 'Gemini 4 Carbon', tier: 'High', vendor: 'google', score: 60, exact: 60.1, cost: 7.76 },
+          { name: 'Claude Opus 5.5', tier: 'Max', vendor: 'anthropic', score: 59, exact: 59.1, cost: 10.04 },
+          { name: 'GPT-6.2 Sol', tier: 'Max', vendor: 'openai', score: 57, exact: 57.3, cost: 1.01 }
+        ];
+
+        function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+
+        function legend(el, rows) {
+          var seen = {}, html = '';
+          rows.forEach(function (r) {
+            if (!seen[r.vendor]) {
+              seen[r.vendor] = true;
+              html += '<span><i style="background:' + COLORS[r.vendor] + '"></i>' + VENDOR_LABEL[r.vendor] + '</span>';
+            }
+          });
+          el.innerHTML = html;
+        }
+
+        /* Horizontal bar chart. Domain derived from data; baseline disclosed on-chart when truncated. */
+        function barChart(el, rows, opts) {
+          var W = 760, rowH = 34, labelW = 218, valW = 118, padTop = 6, axisH = 26;
+          var H = padTop + rows.length * rowH + axisH;
+          var plotW = W - labelW - valW;
+          var min = Math.min.apply(null, rows.map(function (r) { return r.score; }));
+          var max = Math.max.apply(null, rows.map(function (r) { return r.score; }));
+          var lo, hi, ticks;
+          if (opts.fullScale) {
+            lo = 0; hi = 100; ticks = [0, 25, 50, 75, 100];
+          } else {
+            lo = Math.floor((min - 12) / 10) * 10;
+            hi = Math.ceil((max + 4) / 10) * 10;
+            ticks = [];
+            for (var t = lo; t <= hi; t += 10) ticks.push(t);
+          }
+          function x(score) { return labelW + (score - lo) / (hi - lo) * plotW; }
+          var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" font-family="inherit">';
+          ticks.forEach(function (t) {
+            var gx = x(t);
+            s += '<line x1="' + gx + '" y1="' + padTop + '" x2="' + gx + '" y2="' + (H - axisH) + '" stroke="' + COLORS.line + '" stroke-width="1"/>';
+            s += '<text x="' + gx + '" y="' + (H - 8) + '" font-size="11.5" fill="' + COLORS.muted + '" text-anchor="middle">' + t + '</text>';
+          });
+          rows.forEach(function (r, i) {
+            var y = padTop + i * rowH;
+            var cy = y + rowH / 2;
+            var bx = x(r.score);
+            s += '<text x="' + (labelW - 10) + '" y="' + (cy + 4.5) + '" font-size="13.5" fill="' + COLORS.ink + '" text-anchor="end">' + (i + 1) + '. ' + esc(r.name) + '</text>';
+            s += '<rect x="' + labelW + '" y="' + (cy - 8) + '" width="' + plotW + '" height="16" rx="3" fill="' + COLORS.track + '"/>';
+            s += '<rect x="' + labelW + '" y="' + (cy - 8) + '" width="' + Math.max(3, bx - labelW) + '" height="16" rx="3" fill="' + COLORS[r.vendor] + '"/>';
+            var label = opts.valueLabel(r);
+            s += '<text x="' + (bx + 8) + '" y="' + (cy + 4.5) + '" font-size="13" font-weight="700" fill="' + COLORS.ink + '">' + label + '</text>';
+            if (r.isNew) {
+              s += '<text x="' + (labelW - 10) + '" y="' + (cy + 18) + '" font-size="10.5" fill="' + COLORS.muted + '" text-anchor="end">本周新进前十</text>';
+            }
+          });
+          if (!opts.fullScale) {
+            s += '<text x="' + labelW + '" y="' + (H - 8) + '" font-size="11.5" fill="' + COLORS.muted + '" text-anchor="start"></text>';
+          }
+          s += '</svg>';
+          if (!opts.fullScale) {
+            s += '<p style="font-size:12px;color:' + COLORS.muted + ';margin:6px 0 0">注：横轴自 ' + lo + ' 分起（非零基线），以便看清前十名之间 1–7 分的差距；柱长从 ' + lo + ' 分处量起。</p>';
+          }
+          el.innerHTML = s;
+        }
+
+        barChart(document.getElementById('chart-lmarena'), lmarena, {
+          fullScale: false,
+          valueLabel: function (r) { return r.score + ' · ' + r.tier; }
+        });
+        legend(document.getElementById('legend-lmarena'), lmarena);
+
+        barChart(document.getElementById('chart-aa'), aa, {
+          fullScale: true,
+          valueLabel: function (r) { return r.score + '（' + r.exact.toFixed(1) + '）· $' + r.cost.toFixed(2) + '/任务'; }
+        });
+        legend(document.getElementById('legend-aa'), aa);
+
+        /* ---- Vendor filter ---- */
+        var buttons = document.querySelectorAll('.filters button');
+        var groups = document.querySelectorAll('.vendor');
+        buttons.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            buttons.forEach(function (b) { b.setAttribute('aria-pressed', 'false'); });
+            btn.setAttribute('aria-pressed', 'true');
+            var f = btn.getAttribute('data-filter');
+            groups.forEach(function (g) {
+              g.classList.toggle('hidden', f !== 'all' && g.getAttribute('data-vendor') !== f);
+            });
+          });
+        });
+
+        /* ---- Reading progress, TOC highlight, back-to-top ---- */
+        var prog = document.getElementById('progress');
+        var toTop = document.getElementById('toTop');
+        function onScroll() {
+          var h = document.documentElement;
+          var max = h.scrollHeight - h.clientHeight;
+          var pct = max > 0 ? (h.scrollTop / max) * 100 : 0;
+          if (prog) prog.style.width = pct + '%';
+          if (toTop) toTop.classList.toggle('show', h.scrollTop > 700);
+        }
+        window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+        if (toTop) toTop.addEventListener('click', function(){ window.scrollTo({top:0, behavior:'smooth'}); });
+        var tocLinks = document.querySelectorAll('.toc a');
+        var secIds = ['archive','headlines','pricing','rankings','fun','caveats'];
+        if ('IntersectionObserver' in window) {
+          var obs = new IntersectionObserver(function(entries){
+            entries.forEach(function(e){
+              if (e.isIntersecting) {
+                tocLinks.forEach(function(a){ a.classList.toggle('is-active', a.getAttribute('href') === '#' + e.target.id); });
+              }
+            });
+          }, { rootMargin: '-18% 0px -65% 0px' });
+          secIds.forEach(function(id){ var el = document.getElementById(id); if (el) obs.observe(el); });
+        }
+        /* ---- Single-file export: download this page as one standalone index.html ---- */
+        (function () {
+          var btn = document.getElementById('exportBtn');
+          var sizeEl = document.getElementById('exportSize');
+          var statusEl = document.getElementById('exportStatus');
+          function buildStandaloneHtml() {
+            var clone = document.documentElement.cloneNode(true);
+            var prog = clone.querySelector('#progress');
+            if (prog) prog.removeAttribute('style');
+            var status = clone.querySelector('#exportStatus');
+            if (status) status.textContent = '';
+            return '<!doctype html>\n' + clone.outerHTML;
+          }
+          function refreshSize() {
+            try {
+              var bytes = new Blob([buildStandaloneHtml()], { type: 'text/html;charset=utf-8' }).size;
+              if (sizeEl) sizeEl.textContent = '当前单文件约 ' + (bytes / 1024).toFixed(1) + ' KB · 1 个文件搞定';
+            } catch (e) {
+              if (sizeEl) sizeEl.textContent = '1 个文件 · 无外部资源';
+            }
+          }
+          refreshSize();
+          if (btn) {
+            btn.addEventListener('click', function () {
+              try {
+                var blob = new Blob([buildStandaloneHtml()], { type: 'text/html;charset=utf-8' });
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'index.html';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+                if (statusEl) statusEl.textContent = '已开始下载 ✓ 用浏览器打开即可离线阅读';
+              } catch (e) {
+                if (statusEl) statusEl.textContent = '当前环境不允许直接下载，请用浏览器打开本页后另存为 index.html';
+              }
+            });
+          }
+        })();
+
+        /* ---- Archive filter ---- */
+        var archBtns = document.querySelectorAll('[data-arch]');
+        var archItems = document.querySelectorAll('.arch-item');
+        archBtns.forEach(function(btn){
+          btn.addEventListener('click', function(){
+            archBtns.forEach(function(b){ b.setAttribute('aria-pressed','false'); });
+            btn.setAttribute('aria-pressed','true');
+            var f = btn.getAttribute('data-arch');
+            archItems.forEach(function(it){
+              var show = f === 'all' || it.getAttribute('data-month') === f || (it.getAttribute('data-tags') || '').split(' ').indexOf(f) !== -1;
+              it.classList.toggle('hidden', !show);
+            });
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>
